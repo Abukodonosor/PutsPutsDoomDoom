@@ -112,6 +112,7 @@ function leftClick(e){
     console.log("X:"+c_x);
     console.log("Y:"+c_y);
     
+    var hypot = Math.sqrt(Math.pow((c_x-player.x),2)+ Math.pow((c_y-player.y),2));
     
 
     speedX =  parseInt(Math.cos(c_x )*1000);
