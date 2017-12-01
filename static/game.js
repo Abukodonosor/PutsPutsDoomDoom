@@ -112,16 +112,39 @@ function leftClick(e){
     console.log("X:"+c_x);
     console.log("Y:"+c_y);
     
-    var hypot = Math.sqrt(Math.pow((c_x-player.x),2)+ Math.pow((c_y-player.y),2));
-    
+    var quadrant_x = c_x-player.x;
+    var quadrant_y = c_y-player.y;
+    var side_x;
+    var side_y;
+    if( quadrant_x>0 && quadrant_y<0 ){
+        side_x = 1;
+        side_y = 1;
+    }
+    else if( quadrant_x<0 && quadrant_y<0 ){
+        side_x = -1;
+        side_y = 1
+    }
+    else if( quadrant_x<0 && quadrant_y>0 ){
+        side_x = -1;
+        side_y = -1;
+    }
+    else if( quadrant_x>0 && quadrant_y>0 ){
+        side_x = 1;
+        side_y = -1;
+    }
 
-    speedX =  parseInt(Math.cos(c_x )*1000);
-    speedY =  parseInt(Math.sin(c_y ));
+    var hypot = Math.sqrt(Math.pow((quadrant_x),2)+ Math.pow((quadrant_y),2));
+    var oposite = Math.sqrt(Math.pow(quadrant_y, 2));
+    var adjacent = Math.sqrt(Math.pow(quadrant_x,2));
 
 
-    
-    console.log("speedX: "+speedX);
-    console.log("speedY: "+speedY);
+    speedX =  (adjacent/hypot)*side_x;
+    speedY =  (oposite/hypot)*side_y;
+
+    console.log("speedY:"+speedY)
+    console.log("speedX:"+speedX);
+    // console.log("opos:"+oposite);
+
 }
 
 function random_rgba() {
