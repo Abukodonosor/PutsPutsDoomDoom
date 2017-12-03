@@ -1,0 +1,13 @@
+
+
+1. na klientu ce biti samo renderovanje grafike
+
+-sva logika ce biti prebacena na server a u to spada:
+    - saljemo smer na serveru racunamo
+    - saljemo koordinate kliknutog misa, na serveru racunamo
+    - requestAnimationFrame(), svakog otkucaja salje socket serveru sa updejtovanim podatcima
+      ovaj nama vraca listu svih igraca, plus nas, takodje moze vratiti ako je igrac ..
+
+-klient ce se baviti samo renderovanjem grafike ... tako da cemo maximalno olaksati igru za svaku masinu
+-takodje cemo dobiti vise mesta kod klienta tj mocicemo kompleksniji combat i vise ljudi da podrzimo 
+-takodje smo sprecili mogucnost hakovanja i citovanja
