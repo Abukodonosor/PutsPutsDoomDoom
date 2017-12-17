@@ -23,3 +23,14 @@ var server = app.listen(3690, function(){
 
     console.log("Server listening on http://%s:%s", host, port);
 });
+
+// socket io logic
+
+var io = require('socket.io')(server);
+
+io.on('connection', function(client){
+    console.log('User connected ');
+
+    client.on('event', function(data){});
+    client.on('disconnect', function(){});
+  });

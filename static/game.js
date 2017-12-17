@@ -6,6 +6,8 @@ canvas.height = window.innerHeight;
 
 var player = new Player("DJOKA");
 var bulet=null;
+var bulet_array = [];
+
 function main(){
 
     clear();
@@ -13,7 +15,8 @@ function main(){
     render();
  
 
-    requestAnimationFrame(main);    
+    requestAnimationFrame(main);
+    return false;    
 }
 main();
 
@@ -45,7 +48,8 @@ function render(){
 }
 
 function renderBullets(){
-    if(bulet!=null){
+    if(bulet_array!=[])
+        for(bulet of bulet_array){
         ctx.beginPath();
         ctx.arc(bulet.x, bulet.y, bulet.radius, 0, 2 * Math.PI);
         ctx.fillStyle = bulet.color;
@@ -56,12 +60,14 @@ function renderBullets(){
 }
 
 function renderPlayer(){
-    ctx.beginPath();
-    ctx.arc(player.x, player.y, player.radius, 0, 2 * Math.PI);
-    ctx.fillStyle = player.color;
-    ctx.fill();
-    ctx.strokeStyle='white';
-    ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, player.radius, 0, 2 * Math.PI);
+        ctx.fillStyle = player.color;
+        ctx.fill();
+        ctx.strokeStyle='white';
+        ctx.stroke();
+        
 }
 
 function update(){
@@ -82,10 +88,13 @@ function updatePlayer(){
         player.x += 5;
 }
 
+
 function updateBullets(){
-    if(bulet!=null){
-        bulet.x += bulet.x_v;
-        bulet.y += bulet.y_v;
+    if(bulet_array != []){
+        for(bulet of bulet_array){
+            bulet.x += bulet.x_v;
+            bulet.y += bulet.y_v;
+        }
     }
 }
 
@@ -167,14 +176,15 @@ function leftClick(e){
     speedX =  (adjacent/hypot)*side_x;
     speedY =  (oposite/hypot)*side_y;
 
-    buletX = parseInt(speedX*10);
-    buletY = parseInt(speedY*10);
+    buletX = parseInt(speedX*15);
+    buletY = parseInt(speedY*15);
 
     console.log("buletY:"+buletY);
     console.log("buletX:"+buletX);
     // console.log("opos:"+oposite);
     bulet = new Bullet(buletX,buletY);
-    console.log(bulet)
+    bulet_array.push(bulet)
+    console.log(bulet_array.length)
     
 }
 
