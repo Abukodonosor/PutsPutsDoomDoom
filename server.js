@@ -25,12 +25,18 @@ var server = app.listen(3690, function(){
 });
 
 // socket io logic
-
 var io = require('socket.io')(server);
+
 
 io.on('connection', function(client){
     console.log('User connected ');
+    client.emit('message',{ message: 'welcome to the chat' });
+    client.on('send', function (data) {
+        console.log(data)
+        client.emit('message', data);
+    });
 
-    client.on('event', function(data){});
-    client.on('disconnect', function(){});
+
+    // client.on('event', function(data){});
+    // client.on('disconnect', function(){});
   });
