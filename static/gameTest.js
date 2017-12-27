@@ -1,54 +1,28 @@
-window.onload = function() {
-    
 var canvas=document.getElementById("canvas");
 var ctx=canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-var socket = io.connect('http://192.168.1.101:3690');
 
-
-
-playersArray = [];
-player = null;
-
-
-socket.on('send',function (data){
-    // console.log(data)
-    // player = data;
-    playersArray = data;
-    main();
-    
-});
-
-var bulet=null;
+var player = new Player("DJOKA");
+var bulet = null;
 var bulet_array = [];
 
 
-var last_time = 0;
-var current;
-var dt;
-var time = 0;
 
 
 function main(){
 
-    current = Date.now();
-    dt = ( current  - last_time)/ 1000;
-    console.log(dt);
+
     clear();
     update();
     render();
-    time+=dt;
-    if(time > 0.5){
-        data = player
-        socket.emit('send', data);
-        time = 0;
-    }
-    last_time = current;
-    // requestAnimationFrame(main);
-    // return false;    
+ 
+
+    requestAnimationFrame(main);
+    return false;    
 }
+main();
 
 
 function Player (name){
@@ -60,14 +34,14 @@ function Player (name){
     this.color = random_rgba();
 }
 
-// function Bullet(x_v,y_v){
-//     this.x = player.x;
-//     this.y = player.y;
-//     this.x_v = x_v;
-//     this.y_v = y_v;
-//     this.color = "red";
-//     this.radius = 5;
-// }
+function Bullet(x_v,y_v){
+    this.x = player.x;
+    this.y = player.y;
+    this.x_v = x_v;
+    this.y_v = y_v;
+    this.color = "red";
+    this.radius = 5;
+}
 
 function render(){
     // render player
@@ -91,46 +65,34 @@ function renderBullets(){
 
 function renderPlayer(){
 
-    // if(player != null){
-    //     ctx.beginPath();
-    //     ctx.arc(player.x, player.y, player.radius, 0, 2 * Math.PI);
-    //     ctx.fillStyle = player.color;
-    //     ctx.fill();
-    //     ctx.strokeStyle='white';
-    //     ctx.stroke();
-    //     ctx.fillStyle = 'white';
-    //     ctx.fillText(player.name, player.x-15, player.y);
-    // }
-
-    for(var player1 of playersArray){
         ctx.beginPath();
-        ctx.arc(player1.x, player1.y, player1.radius, 0, 2 * Math.PI);
-        ctx.fillStyle = player1.color;
+        ctx.arc(player.x, player.y, player.radius, 0, 2 * Math.PI);
+        ctx.fillStyle = player.color;
         ctx.fill();
         ctx.strokeStyle='white';
         ctx.stroke();
         ctx.fillStyle = 'white';
-        ctx.fillText(player1.name, player1.x-15, player1.y);
-    }
+        ctx.fillText(player.name, player.x-15, player.y);
+    
 }
 
 function update(){
     // player coordinates
-    // updatePlayer();
-    //updateBullets();
+    updatePlayer();
+    updateBullets();
     // update bullets
 }
 
-// function updatePlayer(){
-//     if( up == true)
-//        player.y -= 5;
-//     if( down == true )
-//         player.y += 5;
-//     if( left == true)
-//         player.x -= 5;
-//     if( right == true)
-//         player.x += 5;
-// }
+function updatePlayer(){
+    if( up == true)
+        player.y -= 5;
+    if( down == true )
+        player.y += 5;
+    if( left == true)
+        player.x -= 5;
+    if( right == true)
+        player.x += 5;
+}
 
 
 function updateBullets(){
@@ -156,17 +118,17 @@ var buletY;
 
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
-// document.addEventListener("click", leftClick, false);
+document.addEventListener("click", leftClick, false);
 
 function keyDownHandler(e){
     if(e.keyCode == 65)
-        socket.emit('keyPress',{direction:'left',state:true});//left = true;
+        left = true;
     if(e.keyCode == 68)
-        socket.emit('keyPress',{direction:'right',state:true});//right = true;
+        right = true;
     if(e.keyCode == 87)
-        socket.emit('keyPress',{direction:'up',state:true});//up = true;
+        up = true;
     if(e.keyCode == 83)
-        socket.emit('keyPress',{direction:'down',state:true});//down = true;
+        down = true;
  
     console.log(e.keyCode);
 }
@@ -174,13 +136,13 @@ function keyDownHandler(e){
 function keyUpHandler(e){
     
     if(e.keyCode == 65)
-        socket.emit('keyPress',{direction:'left',state:false});//left = true;
+        left = false;
     if(e.keyCode == 68)
-        socket.emit('keyPress',{direction:'right',state:false});//right = true;
+        right = false;
     if(e.keyCode == 87)
-        socket.emit('keyPress',{direction:'up',state:false});//up = true;
+        up = false;
     if(e.keyCode == 83)
-        socket.emit('keyPress',{direction:'down',state:false});//down = true;
+        down = false;
     
 }
 
@@ -250,8 +212,3 @@ function resizeCanvas() {
   main();
 }
 
-
-
-
-
-}
