@@ -16,10 +16,12 @@ player = null;
 socket.on('send',function (data){
     // console.log(data)
     // player = data;
-    playersArray = data;
+    playersArray = data.player;
+    bulet_array = data.bullet;
     main();
-    
 });
+
+
 
 var bulet=null;
 var bulet_array = [];
@@ -78,8 +80,8 @@ function render(){
 }
 
 function renderBullets(){
-    if(bulet_array!=[])
-        for(bulet of bulet_array){
+    
+    for(bulet of bulet_array){
         ctx.beginPath();
         ctx.arc(bulet.x, bulet.y, bulet.radius, 0, 2 * Math.PI);
         ctx.fillStyle = bulet.color;
@@ -90,17 +92,6 @@ function renderBullets(){
 }
 
 function renderPlayer(){
-
-    // if(player != null){
-    //     ctx.beginPath();
-    //     ctx.arc(player.x, player.y, player.radius, 0, 2 * Math.PI);
-    //     ctx.fillStyle = player.color;
-    //     ctx.fill();
-    //     ctx.strokeStyle='white';
-    //     ctx.stroke();
-    //     ctx.fillStyle = 'white';
-    //     ctx.fillText(player.name, player.x-15, player.y);
-    // }
 
     for(var player1 of playersArray){
         ctx.beginPath();
@@ -120,17 +111,6 @@ function update(){
     //updateBullets();
     // update bullets
 }
-
-// function updatePlayer(){
-//     if( up == true)
-//        player.y -= 5;
-//     if( down == true )
-//         player.y += 5;
-//     if( left == true)
-//         player.x -= 5;
-//     if( right == true)
-//         player.x += 5;
-// }
 
 
 function updateBullets(){
@@ -156,7 +136,7 @@ var buletY;
 
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
-// document.addEventListener("click", leftClick, false);
+document.addEventListener("click", leftClick, false);
 
 function keyDownHandler(e){
     if(e.keyCode == 65)
@@ -189,47 +169,7 @@ function leftClick(e){
     var c_y = e.clientY;
     console.log("X:"+c_x);
     console.log("Y:"+c_y);
-    
-    var quadrant_x = c_x-player.x;
-    var quadrant_y = c_y-player.y;
-    var side_x;
-    var side_y;
-    // prvi kvadrant
-    if( quadrant_x>0 && quadrant_y<0 ){
-        side_x = 1;
-        side_y = -1;
-    }// drugi kvadrant
-    else if( quadrant_x<0 && quadrant_y<0 ){
-        side_x = -1;
-        side_y = -1
-    }// cetvrti kvadrant  
-    else if( quadrant_x>0 && quadrant_y>0 ){
-        side_x = 1;
-        side_y = 1;
-    }// treci kvadrant 
-    else if( quadrant_x<0 && quadrant_y>0 ){
-        side_x = -1;
-        side_y = 1;
-    }
-
-    var hypot = Math.sqrt(Math.pow((quadrant_x),2)+ Math.pow((quadrant_y),2));
-    var oposite = Math.sqrt(Math.pow(quadrant_y, 2));
-    var adjacent = Math.sqrt(Math.pow(quadrant_x,2));
-
-
-    speedX =  (adjacent/hypot)*side_x;
-    speedY =  (oposite/hypot)*side_y;
-
-    buletX = parseInt(speedX*15);
-    buletY = parseInt(speedY*15);
-
-    console.log("buletY:"+buletY);
-    console.log("buletX:"+buletX);
-    // console.log("opos:"+oposite);
-    bulet = new Bullet(buletX,buletY);
-    bulet_array.push(bulet)
-    console.log(bulet_array.length)
-    
+    socket.emit('fire',{x:c_x,y:c_y});
 }
 
 function random_rgba() {

@@ -40,6 +40,7 @@ var io = require('socket.io')(server);
 
 CLIENT_LIST = [];
 PLAYER_LIST = [];
+BULLET_LIST = [];
 
 function Player ( name, id){
     this.name = name;
@@ -54,6 +55,15 @@ function Player ( name, id){
     this.up = false;
     this.down = false;
     this.maxSpeed = 5;
+}
+
+function Bullet(x_v,y_v,player){
+    this.x = player.x;
+    this.y = player.y;
+    this.x_v = x_v;
+    this.y_v = y_v;
+    this.color = "red";
+    this.radius = 5;
 }
 
 
@@ -82,6 +92,11 @@ io.on('connection', function(client){
         // obradi sto je poslao move
     });
 
+    client.on('fire', function(bulet){
+        console.log(bulet.x,bulet.y);
+        createBullet(bulet.x,bulet.y,player);
+    });
+
     client.on('disconnect', function() {
         delete CLIENT_LIST[client.id];
         delete PLAYER_LIST[client.id];
@@ -93,21 +108,35 @@ io.on('connection', function(client){
 
 setInterval(function(){
 
-  var pack = [];
+  var pack_player = [];
+  var pack_bulet = [];
 
   for( var i in PLAYER_LIST){
       var player = PLAYER_LIST[i];
       updatePlayer(player);
-      pack.push(player);
+      pack_player.push(player);
   }
+
+  for( var i in BULLET_LIST){
+      var bulet = BULLET_LIST[i];
+      updateBullets(bulet);
+      pack_bulet.push(bulet);
+  }
+
+  var pack = {
+      player:pack_player,
+      bullet:pack_bulet
+  };
 
   for(var i in CLIENT_LIST){
       var client = CLIENT_LIST[i];
       client.emit('send',pack);
   }
 
-},1000/30);
+},1000/60);
 
+
+// update coordinates of players
 function updatePlayer(player){
     if( player.up == true)
         player.y -= 5;
@@ -119,13 +148,67 @@ function updatePlayer(player){
         player.x += 5;
 }
 
+function updateBullets(bulet){
+    
+    bulet.x += bulet.x_v;
+    bulet.y += bulet.y_v;
 
-// client.on('send', function (data) {
-//     console.log(data)
-//     data.x +=4;
-//     console.log(data)
-//     client.emit('send',data);
-// });
+}
+
+function createBullet(c_x,c_y,player){
+    console.log("X:"+c_x);
+    console.log("Y:"+c_y);
+    
+    var quadrant_x = c_x-player.x;
+    var quadrant_y = c_y-player.y;
+    var side_x;
+    var side_y;
+    // prvi kvadrant
+    if( quadrant_x>0 && quadrant_y<0 ){
+        side_x = 1;
+        side_y = -1;
+    }// drugi kvadrant
+    else if( quadrant_x<0 && quadrant_y<0 ){
+        side_x = -1;
+        side_y = -1
+    }// cetvrti kvadrant  
+    else if( quadrant_x>0 && quadrant_y>0 ){
+        side_x = 1;
+        side_y = 1;
+    }// treci kvadrant 
+    else if( quadrant_x<0 && quadrant_y>0 ){
+        side_x = -1;
+        side_y = 1;
+    }
+
+    var hypot = Math.sqrt(Math.pow((quadrant_x),2)+ Math.pow((quadrant_y),2));
+    var oposite = Math.sqrt(Math.pow(quadrant_y, 2));
+    var adjacent = Math.sqrt(Math.pow(quadrant_x,2));
+
+
+    speedX =  (adjacent/hypot)*side_x;
+    speedY =  (oposite/hypot)*side_y;
+
+    buletX = parseInt(speedX*15);
+    buletY = parseInt(speedY*15);
+
+    console.log("buletY:"+buletY);
+    console.log("buletX:"+buletX);
+    // console.log("opos:"+oposite);
+    bulet = new Bullet(buletX,buletY,player);
+    BULLET_LIST.push(bulet)
+    // // bulet_array.push(bulet)
+    // console.log(bulet)
+    
+}
+
+
+function updateBullets(bulet){
+    
+            bulet.x += bulet.x_v;
+            bulet.y += bulet.y_v;
+    
+}
 
 
 //https://www.youtube.com/watch?v=_GioD4LpjMw
