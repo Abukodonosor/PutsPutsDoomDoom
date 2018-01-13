@@ -1,194 +1,220 @@
 window.onload = function() {
     
-var canvas=document.getElementById("canvas");
-var ctx=canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+    var canvas=document.getElementById("canvas");
+    var ctx=canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-var socket = io.connect('http://192.168.1.101:3690');
-
-
-
-playersArray = [];
-player = null;
-
-
-socket.on('send',function (data){
-    // console.log(data)
-    // player = data;
-    playersArray = data.player;
-    bulet_array = data.bullet;
-    main();
-});
+    var socket = io.connect('http://192.168.1.100:3690');
 
 
 
-var bulet=null;
-var bulet_array = [];
+    playersArray = [];
+    player = null;
+
+    var map= {
+        x:3000,
+        y:3000
+    };
+    offsetMaxX = map.x - canvas.width;
+    offsetMaxY = map.y - canvas.height;
+    offsetMinX = 0;
+    offsetMinY = 0;
 
 
-var last_time = 0;
-var current;
-var dt;
-var time = 0;
 
 
-function main(){
+    socket.on('send',function (data){
+        // console.log("PPLAYER:");
+        console.log(socket.id);
+        // player = data;
+        playersArray = data.player;
+        
+        // on wake impuls just once when game is started on other side of planet
+        for(var i = 0;i<playersArray.length;i++){
+            if(playersArray[i].id == socket.id){
+                player = playersArray[i];
+                break;
+            }
+        }
 
-    current = Date.now();
-    dt = ( current  - last_time)/ 1000;
-    console.log(dt);
-    clear();
-    update();
-    render();
-    time+=dt;
-    if(time > 0.5){
-        data = player
-        socket.emit('send', data);
-        time = 0;
+        bulet_array = data.bullet;
+        main();
+    });
+
+
+
+    var bulet = null;
+    var bulet_array = [];
+
+
+    var last_time = 0;
+    var current;
+    var dt;
+    var time = 0;
+
+
+    function main(){
+
+        current = Date.now();
+        dt = ( current  - last_time)/ 1000;
+        // console.log(dt);
+        clear();
+        render();
+        time+=dt;
+        if(time > 0.5){
+            data = player
+            console.log(player)
+            socket.emit('send', data);
+            time = 0;
+        }
+        last_time = current;
+        // requestAnimationFrame(main);
+        // return false;    
     }
-    last_time = current;
-    // requestAnimationFrame(main);
-    // return false;    
-}
 
 
-function Player (name){
-    this.name = name;
-    this.x = Math.floor((Math.random() * canvas.width) + 1);
-    this.y = Math.floor((Math.random() * canvas.height) + 1);
-    this.radius = 20;
+    function render(){
     
-    this.color = random_rgba();
-}
+   
+        camX = player.x - canvas.width / 2;
+        camY = player.y - canvas.height / 2;
+        if (camX > offsetMaxX)
+            camX = offsetMaxX
+        else if (camX < offsetMinX)
+            camX = offsetMinX
+        if (camY > offsetMaxY)
+            camY = offsetMaxY
+        else if (camY < offsetMinY)
+            camY = offsetMinY
 
-// function Bullet(x_v,y_v){
-//     this.x = player.x;
-//     this.y = player.y;
-//     this.x_v = x_v;
-//     this.y_v = y_v;
-//     this.color = "red";
-//     this.radius = 5;
-// }
 
-function render(){
-    // render player
-    renderPlayer();
-    renderBullets();
-    // render bullets
+                ctx.save();
+                ctx.translate( -camX , -camY);
+                map_render();
+                renderPlayer();
+                renderBullets();
+                ctx.restore();
+        // // render player
+        // renderPlayer();
+        // renderBullets();
+        // // render bullets
 
-}
+    }
 
-function renderBullets(){
+    var _tWidth = 40;
+    var _tHeight = 40;
+    var _numTileHeight = 90;
+    var _numTileWidth = 90;
+    function map_render(){
     
-    for(bulet of bulet_array){
-        ctx.beginPath();
-        ctx.arc(bulet.x, bulet.y, bulet.radius, 0, 2 * Math.PI);
-        ctx.fillStyle = bulet.color;
-        ctx.fill();
-        ctx.strokeStyle='yellow';
-        ctx.stroke();
+        // var grd = ctx.createLinearGradient(0, 60, 70, 0);
+        // grd.addColorStop(0, "red");
+        // grd.addColorStop(1, "orange");
+        // grd.addColorStop(1, "blue");
+        // ctx.fillStyle = grd;
+        // ctx.fillRect(0,0, map.x,map.y);
+        // napravi matricu sivih kvadratasa zelenim linijama
+        for (var i = 0, len = _numTileHeight; i < len; i++) {
+            for (var k = 0, len2 = _numTileWidth; k < len2; k++) {
+                var x = k * _tWidth,
+                    y = i * _tHeight;
+                    ctx.fillStyle = "#2d2b2b";
+                    ctx.fillRect( x+1*k, y+1*i, _tWidth, _tHeight);
+            }
+        }
+   
     }
-}
 
-function renderPlayer(){
-
-    for(var player1 of playersArray){
-        ctx.beginPath();
-        ctx.arc(player1.x, player1.y, player1.radius, 0, 2 * Math.PI);
-        ctx.fillStyle = player1.color;
-        ctx.fill();
-        ctx.strokeStyle='white';
-        ctx.stroke();
-        ctx.fillStyle = 'white';
-        ctx.fillText(player1.name, player1.x-15, player1.y);
-    }
-}
-
-function update(){
-    // player coordinates
-    // updatePlayer();
-    //updateBullets();
-    // update bullets
-}
-
-
-function updateBullets(){
-    if(bulet_array != []){
+    function renderBullets(){
+        
         for(bulet of bulet_array){
-            bulet.x += bulet.x_v;
-            bulet.y += bulet.y_v;
+            ctx.beginPath();
+            ctx.arc(bulet.x, bulet.y, bulet.radius, 0, 2 * Math.PI);
+            ctx.fillStyle = bulet.color;
+            ctx.fill();
+            ctx.strokeStyle='yellow';
+            ctx.stroke();
         }
     }
-}
 
-//  player event
-var up = false;
-var down = false;
-var left = false;
-var right = false;
+    function renderPlayer(){
 
-// bulets
-var speedX;
-var speedY;
-var buletX;
-var buletY;
+        for(var player1 of playersArray){
+            ctx.beginPath();
+            ctx.arc(player1.x, player1.y, player1.radius, 0, 2 * Math.PI);
+            ctx.fillStyle = player1.color;
+            ctx.fill();
+            ctx.strokeStyle='white';
+            ctx.stroke();
+            ctx.fillStyle = 'white';
+            ctx.fillText(player1.name, player1.x-15, player1.y);
+        }
+    }
 
-document.addEventListener("keydown", keyDownHandler, false);
-document.addEventListener("keyup", keyUpHandler, false);
-document.addEventListener("click", leftClick, false);
+    //  player event
+    var up = false;
+    var down = false;
+    var left = false;
+    var right = false;
 
-function keyDownHandler(e){
-    if(e.keyCode == 65)
-        socket.emit('keyPress',{direction:'left',state:true});//left = true;
-    if(e.keyCode == 68)
-        socket.emit('keyPress',{direction:'right',state:true});//right = true;
-    if(e.keyCode == 87)
-        socket.emit('keyPress',{direction:'up',state:true});//up = true;
-    if(e.keyCode == 83)
-        socket.emit('keyPress',{direction:'down',state:true});//down = true;
- 
-    console.log(e.keyCode);
-}
 
-function keyUpHandler(e){
+    document.addEventListener("keydown", keyDownHandler, false);
+    document.addEventListener("keyup", keyUpHandler, false);
+    document.addEventListener("click", leftClick, false);
+
+    function keyDownHandler(e){
+        if(e.keyCode == 65)
+            socket.emit('keyPress',{direction:'left',state:true});//left = true;
+        if(e.keyCode == 68)
+            socket.emit('keyPress',{direction:'right',state:true});//right = true;
+        if(e.keyCode == 87)
+            socket.emit('keyPress',{direction:'up',state:true});//up = true;
+        if(e.keyCode == 83)
+            socket.emit('keyPress',{direction:'down',state:true});//down = true;
     
-    if(e.keyCode == 65)
-        socket.emit('keyPress',{direction:'left',state:false});//left = true;
-    if(e.keyCode == 68)
-        socket.emit('keyPress',{direction:'right',state:false});//right = true;
-    if(e.keyCode == 87)
-        socket.emit('keyPress',{direction:'up',state:false});//up = true;
-    if(e.keyCode == 83)
-        socket.emit('keyPress',{direction:'down',state:false});//down = true;
-    
-}
+        console.log(e.keyCode);
+    }
 
-function leftClick(e){
-    var c_x = e.clientX;
-    var c_y = e.clientY;
-    console.log("X:"+c_x);
-    console.log("Y:"+c_y);
-    socket.emit('fire',{x:c_x,y:c_y});
-}
+    function keyUpHandler(e){
+        
+        if(e.keyCode == 65)
+            socket.emit('keyPress',{direction:'left',state:false});//left = true;
+        if(e.keyCode == 68)
+            socket.emit('keyPress',{direction:'right',state:false});//right = true;
+        if(e.keyCode == 87)
+            socket.emit('keyPress',{direction:'up',state:false});//up = true;
+        if(e.keyCode == 83)
+            socket.emit('keyPress',{direction:'down',state:false});//down = true;
+        
+    }
 
-function random_rgba() {
-    var o = Math.round, r = Math.random, s = 155;
-    return 'rgb(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) +  ')';
-}
+    function leftClick(e){
+        var c_x = e.clientX+camX;
+        var c_y = e.clientY+camY;
+        console.log("X:"+c_x);
+        console.log("Y:"+c_y);
+        socket.emit('fire',{x:c_x,y:c_y});
+    }
 
-function clear(){
-    ctx.fillStyle='black';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-}
+    function random_rgba() {
+        var o = Math.round, r = Math.random, s = 155;
+        return 'rgb(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) +  ')';
+    }
 
-document.addEventListener('resize', resizeCanvas, false);
-function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;    
+    function clear(){
+        
+        ctx.fillStyle="#ee13f9";
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+    }
 
-  main();
-}
+    document.addEventListener('resize', resizeCanvas, false);
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;    
+
+    main();
+    }
 
 
 
