@@ -1,7 +1,7 @@
 ### PutsPutsDoomDoom
 (=> webSocket based game <=)
 
-This is a demo sample of pve/pvp browser game.
+This is a demo sample of 2D pve/pvp browser game.
 We have vision to make gameArena where players need to work together to survial pve events and 
 after that they must face against themselfs.
 
