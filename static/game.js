@@ -1,3 +1,4 @@
+
 window.onload = function() {
     
     var canvas=document.getElementById("canvas");
@@ -5,9 +6,7 @@ window.onload = function() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    var socket = io.connect('http://192.168.1.100:3690');
-
-
+    var socket = io.connect(window.config.ip_port);
 
     playersArray = [];
     player = null;
@@ -20,8 +19,6 @@ window.onload = function() {
     offsetMaxY = map.y - canvas.height;
     offsetMinX = 0;
     offsetMinY = 0;
-
-
 
 
     socket.on('send',function (data){
@@ -215,9 +212,6 @@ window.onload = function() {
 
     main();
     }
-
-
-
 
 
 }
