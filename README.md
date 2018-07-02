@@ -15,6 +15,6 @@ Games are much more interesting when you play it in companion ... lets build it 
 To run this demoSimulation you have to :
 
 0. Open the file ``` static/config.js ``` and set ip adres to your own (local).
-1. Type in console ``` node server.js ```  and you can play online with your friends in network !
+1. Type in console ``` node server.js ```  and you can play with your friends in network !
 2. Visit from browser: localhost:3690 , Good Luck  XD
 
